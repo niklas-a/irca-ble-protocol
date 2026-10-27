@@ -675,12 +675,20 @@ disconnect.
 Two things follow for any client:
 
 * **Keep the link busy.** Polling `REFRESH_STATUS` every ~20 s both refreshes
-  state and prevents the drop. In testing, a client that polled survived well
-  past the point where an idle one had already been dropped.
+  state and prevents the drop. In testing, a polling client stayed connected
+  for 150 s and counting, where an idle one had already been dropped. This is
+  the effective mitigation.
 * **Reconnect with `autoConnect = true`** (on Android) or the platform's
   equivalent "connect when it next appears". The heater is typically *not*
   advertising in the moments right after it hangs up, so a direct one-shot
-  reconnect fails; handing the retry to the Bluetooth stack works.
+  reconnect fails immediately.
+
+Honest caveat on the second point: `autoConnect` retries did **not** reliably
+recover within a couple of minutes in testing, whereas an explicit
+user-triggered reconnect succeeded immediately every time. So treat automatic
+recovery as best-effort and always keep a manual reconnect affordance in the
+UI. Preventing the drop by polling is far more dependable than recovering from
+it.
 
 A naive client that connects, subscribes, and then waits for notifications will
 appear to work for about a minute and then silently stop updating — with no

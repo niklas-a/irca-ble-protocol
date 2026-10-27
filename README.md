@@ -70,6 +70,11 @@ Studio, no AndroidX**. The whole app is ~1,500 lines of plain Java and the
 resulting APK is 37 KB. `FACTORY_RESET` is deliberately not implemented
 anywhere in it.
 
+**Known limitation:** the heater hangs up on idle links (spec §12.3.1). The
+20 s poll prevents this in normal use, but if the link does drop, automatic
+recovery is best-effort — tapping **Find my heater** reconnects immediately
+and reliably.
+
 The **Debug** button in the header opens a raw protocol view: the live `STATUS`
 frame in hex, every field decoded, direct command buttons labelled with their
 opcodes, and a running log of each frame in and out. It is how most of the
