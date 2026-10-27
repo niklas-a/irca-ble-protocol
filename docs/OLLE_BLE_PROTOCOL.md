@@ -618,7 +618,53 @@ check. Parsers must tolerate it rather than assume `0..3`.
 These frames are encoded as regression tests in `scripts/test_protocol.py`
 (62 assertions, all passing).
 
-### 12.3 Still to verify
+### 12.3 Write path (confirmed)
+
+`SET_ON` / `SET_OFF` round-trip, **with no `AUTH_DEVICE` sent at any point**:
+
+```
+-> 0d 01 ff…ff f3                     SET_ON, seq 0x01
+<- 04 0d 01 ff…ff 08    RESULT        status=OK, opcode echo 0x0D, seq echo 0x01
+<- 08 00 1f 02 05 08 02 00 00 55 …    STATUS  mode 0x00 OFF -> 0x02 COMFORT
+                                              setpoint 0x00 -> 0x08
+
+-> 0e 02 ff…ff f3                     SET_OFF, seq 0x02
+<- 04 0e 02 ff…ff 08    RESULT        status=OK, opcode echo 0x0E, seq echo 0x02
+<- 00 00 1f 00 05 08 02 00 00 55 …    STATUS  mode back to 0x00 OFF, setpoint 0x00
+```
+
+This confirms, on hardware: the frame format, the XOR checksum, the opcode
+values, the `[status][opcode][seq]` result layout, **and** that state-changing
+writes are accepted without authentication.
+
+#### `SET_ON` resumes a mode — it is not a neutral "on"
+
+Note what `SET_ON` actually did: mode went `OFF → COMFORT`, and the setpoint
+byte went `0x00 → 0x08`, which is exactly the unit's stored **comfort** level
+(`STATUS[5] = 8`). So `SET_ON` means "resume operating in the configured mode",
+not "energise at some generic setting".
+
+Implementers should therefore:
+
+* not assume `SET_ON` leaves the device in a known state — **read `STATUS`
+  back** rather than optimistically rendering "on";
+* treat `SET_MODE` as the real control surface. `SET_ON` followed immediately
+  by `SET_MODE` is the reliable way to reach a specific state.
+
+Conversely `SET_OFF` cleanly returned mode to `0x00` and setpoint to `0x00`.
+
+#### `CIP` is not instantaneous power
+
+`CIP` read `27` in one session and `31` about twenty minutes later, and **did
+not change at all** across the `SET_ON` → `SET_OFF` cycle — it stayed `31` while
+the unit was off, on, and off again.
+
+That is strong evidence against the natural guess that `CIP` is an
+instantaneous current/power figure. It behaves like a slowly-incrementing
+counter (operating hours, cycle count, or similar). **Do not expose it as a
+power sensor.** Its true meaning remains unconfirmed.
+
+### 12.4 Still to verify
 
 A future session with owner consent should confirm, in this order:
 

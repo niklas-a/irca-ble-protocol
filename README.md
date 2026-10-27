@@ -17,6 +17,7 @@ anything else that speaks Bluetooth LE, instead of only from the vendor app.
 | Path | What it is |
 |---|---|
 | [`docs/OLLE_BLE_PROTOCOL.md`](docs/OLLE_BLE_PROTOCOL.md) | **The protocol specification.** GATT map, 20-byte frame format, full opcode table, status layout, auth analysis, verification log. |
+| [`androidapp/`](androidapp/) | **A working Android app** that controls the heater. Plain Java, no Gradle, no AndroidX — builds to a 37 KB APK in about five seconds. |
 | [`docs/BUILDING_AN_INTEGRATION.md`](docs/BUILDING_AN_INTEGRATION.md) | How to turn the spec into a Home Assistant integration or standalone app. Entity modelling, connection management, publishing checklist. |
 | `scripts/olle_protocol.py` | Dependency-free protocol library: frame building, checksums, status/result parsing. |
 | `scripts/test_protocol.py` | 62 offline assertions, including real captured frames as regressions. No hardware needed. |
@@ -42,6 +43,22 @@ Run the test suite without any hardware:
 ```bash
 cd scripts && python test_protocol.py
 ```
+
+### The Android app
+
+A self-contained controller app: circular setpoint dial, on/off, mode
+selection, and a debug screen showing every frame in and out.
+
+```bash
+cd androidapp
+./build.sh            # aapt2 -> javac -> d8 -> zipalign -> apksigner
+./build.sh install    # ...and adb install -r
+```
+
+It needs only the Android SDK build-tools and a JDK — **no Gradle, no Android
+Studio, no AndroidX**. The whole app is ~1,500 lines of plain Java and the
+resulting APK is 37 KB. `FACTORY_RESET` is deliberately not implemented
+anywhere in it.
 
 ## The protocol in one screen
 
@@ -90,10 +107,11 @@ variant):
 - ✅ 20-byte frame format and XOR checksum (6 real frames)
 - ✅ `STATUS` decode — matched the app's own defaults exactly
 - ✅ `RESULT` layout (this **corrected** what the vendor app's own code implies)
+- ✅ `SET_ON` / `SET_OFF` round-trip — accepted, executed, and reflected in
+  `STATUS`, **with no authentication sent at any point**
 - ✅ `REFRESH_STATUS` write accepted with no authentication
-- ⚠️ **State-changing writes (`SET_ON`, setpoints, …) are spec-only and have not
-  been executed against hardware.** They are derived from the app's code and the
-  frame format is confirmed, but you would be the first to run them.
+- ⚠️ Setpoint and mode writes (`0x02`, `0x03`) are exercised by the Android app
+  but have not been separately verified frame-by-frame.
 - ⚠️ The Celsius `×10 − 70` codec is derived from two independent places in the
   app but has never been seen on real hardware — the test unit uses abstract
   power levels 1–10 instead.
