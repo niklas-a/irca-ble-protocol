@@ -10,6 +10,16 @@ anything else that speaks Bluetooth LE, instead of only from the vendor app.
 > **Not affiliated with** IRCA S.p.A., Zoppas Industries, Sysdata, Somatherm, or
 > any related company. No vendor code, binaries, or assets are distributed here.
 
+<p align="center">
+  <img src="docs/screenshots/app-main.png" alt="The control app: a circular setpoint dial showing Comfort at power level 8, with a Turn off button and mode chips" width="340">
+</p>
+
+<p align="center">
+  <em>The included Android app — 37 KB, plain Java, no Gradle. The dial adapts
+  to whichever unit family the heater reports: power levels 1–10 here,
+  real degrees on a Celsius or Fahrenheit unit.</em>
+</p>
+
 ---
 
 ## What's here
@@ -59,6 +69,16 @@ It needs only the Android SDK build-tools and a JDK — **no Gradle, no Android
 Studio, no AndroidX**. The whole app is ~1,500 lines of plain Java and the
 resulting APK is 37 KB. `FACTORY_RESET` is deliberately not implemented
 anywhere in it.
+
+The **Debug** button in the header opens a raw protocol view: the live `STATUS`
+frame in hex, every field decoded, direct command buttons labelled with their
+opcodes, and a running log of each frame in and out. It is how most of the
+verification in [spec §12](docs/OLLE_BLE_PROTOCOL.md#12-verification-log) gets
+reproduced.
+
+<p align="center">
+  <img src="docs/screenshots/app-debug.png" alt="The debug screen: raw status frame in hex, decoded fields, and command buttons labelled with their opcodes" width="320">
+</p>
 
 ## The protocol in one screen
 

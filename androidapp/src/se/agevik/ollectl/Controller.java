@@ -235,7 +235,10 @@ public final class Controller implements OlleGatt.Listener {
             main.postDelayed(new Runnable() {
                 public void run() {
                     if (!userDisconnected && !gatt.isReady() && lastDevice != null) {
-                        gatt.connect(lastDevice);
+                        // autoConnect: the heater is usually not advertising
+                        // the instant after it hangs up, so let the stack
+                        // wait for it rather than failing a direct connect.
+                        gatt.connect(lastDevice, true);
                     }
                 }
             }, delay);
@@ -245,7 +248,9 @@ public final class Controller implements OlleGatt.Listener {
         if (wasConnected && !userDisconnected) {
             onLog("giving up after " + reconnectAttempts + " reconnect attempts");
         }
-        pushConnection(text, false);
+        // Never leave the UI claiming "Reconnecting…" once we have stopped.
+        pushConnection(reconnectAttempts >= MAX_RECONNECT
+                ? "Disconnected - tap to reconnect" : text, false);
     }
 
     private void pushConnection(String text, boolean isConnected) {

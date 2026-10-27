@@ -100,9 +100,21 @@ public class OlleGatt {
 
     // ---- lifecycle -------------------------------------------------------
     public void connect(BluetoothDevice device) {
+        connect(device, false);
+    }
+
+    /**
+     * @param autoConnect hand the retry to the Bluetooth stack instead of
+     *     attempting a single direct connection. Direct connects fail quickly
+     *     if the peripheral is not advertising right now, which is exactly the
+     *     case just after this heater drops an idle link - so reconnects use
+     *     autoConnect and simply wait for it to show up again.
+     */
+    public void connect(BluetoothDevice device, boolean autoConnect) {
         close();
-        state("Connecting to " + device.getAddress() + " …", false);
-        gatt = device.connectGatt(ctx, false, callback, BluetoothDevice.TRANSPORT_LE);
+        state(autoConnect ? "Reconnecting…"
+                          : "Connecting to " + device.getAddress() + " …", false);
+        gatt = device.connectGatt(ctx, autoConnect, callback, BluetoothDevice.TRANSPORT_LE);
     }
 
     public void close() {

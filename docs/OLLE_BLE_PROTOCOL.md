@@ -664,6 +664,28 @@ instantaneous current/power figure. It behaves like a slowly-incrementing
 counter (operating hours, cycle count, or similar). **Do not expose it as a
 power sensor.** Its true meaning remains unconfirmed.
 
+### 12.3.1 The heater hangs up on idle links
+
+Observed repeatedly: after roughly one to two minutes with no GATT traffic, the
+device drops the connection. Android surfaces this as
+`onConnectionStateChange` with **status 59 (`0x3B`)**, i.e. the controller
+reporting unacceptable connection parameters, rather than a clean remote
+disconnect.
+
+Two things follow for any client:
+
+* **Keep the link busy.** Polling `REFRESH_STATUS` every ~20 s both refreshes
+  state and prevents the drop. In testing, a client that polled survived well
+  past the point where an idle one had already been dropped.
+* **Reconnect with `autoConnect = true`** (on Android) or the platform's
+  equivalent "connect when it next appears". The heater is typically *not*
+  advertising in the moments right after it hangs up, so a direct one-shot
+  reconnect fails; handing the retry to the Bluetooth stack works.
+
+A naive client that connects, subscribes, and then waits for notifications will
+appear to work for about a minute and then silently stop updating — with no
+error, because it never asked for anything.
+
 ### 12.4 Still to verify
 
 A future session with owner consent should confirm, in this order:
