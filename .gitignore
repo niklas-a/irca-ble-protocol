@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# NEVER COMMIT THESE
+# ---------------------------------------------------------------------------
+# Vendor copyrighted material. This project is lawful interoperability work
+# (EU Directive 2009/24/EC Art. 6); redistributing the vendor's binary or its
+# decompiled source is not. Keep them local.
+apk/
+decompiled/
+*.apk
+*.dex
+
+# Android bugreports and Bluetooth snoop logs. Bugreport zips contain the
+# phone owner's installed applications, accounts, system logs and more.
+# Snoop logs contain every Bluetooth device the phone talked to.
+captures/
+*.btsnoop
+btsnoop*.log
+bugreport*.zip
+
+# Live credentials. A device_id is a working credential for a physical heater.
+device_id.txt
+secrets.yaml
+.env
+
+# ---------------------------------------------------------------------------
+# Ordinary noise
+# ---------------------------------------------------------------------------
+tools/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
