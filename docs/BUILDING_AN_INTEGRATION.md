@@ -214,17 +214,27 @@ ble_device = bluetooth.async_ble_device_from_address(hass, address, connectable=
 client = await establish_connection(BleakClient, ble_device, address)
 ```
 
-### Coordinator
+### Connection lifetime: transient, not persistent
 
-A `DataUpdateCoordinator` with a connect → refresh → read cycle. Two design
-points specific to this device:
+**Recommendation: connect per operation and disconnect afterwards.** Do not
+hold the link open between polls.
 
-* **Don't hold the connection open indefinitely.** The heater appears to accept
-  one connection at a time; staying connected means the owner's phone app can
-  never connect. Connect, poll, disconnect — or at minimum disconnect on
-  demand. This is a real usability issue, not a theoretical one.
-* **Poll slowly.** 60–120 s is plenty for a towel rail. BLE polling costs
-  airtime and battery on proxies.
+Three reasons, in order of weight:
+
+1. **The heater accepts one connection at a time.** A persistent HA connection
+   means the owner can never open the vendor app — or this project's Android
+   app — without first disabling the integration. That is a daily annoyance,
+   not a theoretical one.
+2. **The firmware doesn't want a persistent link anyway.** It hangs up on idle
+   connections after a minute or two (spec §12.3.1). Keeping one alive costs a
+   `REFRESH_STATUS` every ~20 s *purely as a keepalive* — pointless traffic for
+   a device whose state changes a few times a day.
+3. **Recovery is the unreliable path.** Automatic reconnection after a drop
+   proved flaky in testing, while a fresh connect succeeded immediately every
+   time. Transient connections never enter the failure mode at all.
+
+So the idle-drop behaviour is an argument *for* transient connections, not a
+problem to engineer around.
 
 ```python
 class IrcaCoordinator(DataUpdateCoordinator[protocol.Status]):
@@ -237,9 +247,40 @@ class IrcaCoordinator(DataUpdateCoordinator[protocol.Status]):
             return await c.refresh()
 ```
 
-After any command, call `await coordinator.async_request_refresh()` so the UI
-reflects reality rather than an optimistic guess — the device may clamp or
-reject a value.
+**Batch the write and the read-back into one connection.** A command should be
+connect → (optional auth) → write → await `RESULT` → `REFRESH_STATUS` → read
+`STATUS` → disconnect. Doing the command and the confirmation as two separate
+connections doubles the latency for no benefit:
+
+```python
+async def async_set_mode(self, mode: protocol.Mode) -> protocol.Status:
+    async with IrcaClient(self._ble_device(), self._device_id) as c:
+        await c.set_mode(mode)
+        return await c.refresh()          # same connection
+    # coordinator.async_set_updated_data(status) afterwards - no second connect
+```
+
+Then call `coordinator.async_set_updated_data(...)` with what you read, rather
+than `async_request_refresh()`, which would open a third connection. Always
+reflect what the device reported, never an optimistic guess — `SET_ON` resumes
+the stored mode rather than a neutral state (spec §12.3), so an optimistic UI
+will be wrong.
+
+**Cost of a transient connect.** Roughly 1–3 s including service discovery.
+`bleak-retry-connector` caches the GATT service table per address, so repeat
+connections skip discovery and land at the lower end. For a towel rail that is
+entirely acceptable; if it ever isn't, the fix is a short-lived connection that
+lingers a few seconds after the last command, not a permanently open one.
+
+**Poll slowly.** 60–120 s is plenty. BLE polling costs airtime and, on an
+ESPHome proxy, contention with every other device that proxy serves.
+
+> **Why the Android app in this repo does the opposite.** It holds the
+> connection open and polls every 20 s, because it is a foreground interactive
+> UI: the user is looking at it and expects the dial to respond immediately.
+> That trade-off is right for a screen someone is actively using and wrong for
+> a background integration. Don't copy `Controller.java`'s lifetime model into
+> Home Assistant.
 
 ---
 

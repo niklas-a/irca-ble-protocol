@@ -690,6 +690,13 @@ recovery as best-effort and always keep a manual reconnect affordance in the
 UI. Preventing the drop by polling is far more dependable than recovering from
 it.
 
+**This only applies if you want a persistent link.** A background integration
+should not want one: connect, do the work, disconnect, and the idle timeout
+never arises. See `BUILDING_AN_INTEGRATION.md` §4 — the keepalive advice above
+is for a foreground interactive UI, and copying it into a Home Assistant
+coordinator would both waste airtime and permanently occupy the device's single
+connection slot.
+
 A naive client that connects, subscribes, and then waits for notifications will
 appear to work for about a minute and then silently stop updating — with no
 error, because it never asked for anything.
