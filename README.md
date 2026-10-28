@@ -1,5 +1,9 @@
 # irca-ble-protocol
 
+[![Tests](https://github.com/niklas-a/irca-ble-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/niklas-a/irca-ble-protocol/actions/workflows/tests.yml)
+[![Validate](https://github.com/niklas-a/irca-ble-protocol/actions/workflows/validate.yml/badge.svg)](https://github.com/niklas-a/irca-ble-protocol/actions/workflows/validate.yml)
+[![hacs](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
+
 Reverse-engineered BLE protocol for **IRCA / Zoppas** electric heaters and towel
 rails — the ones sold under names like **Olle** (Somatherm) and controlled by the
 *Olle Connect* Android app — plus a clean-room Python implementation.
