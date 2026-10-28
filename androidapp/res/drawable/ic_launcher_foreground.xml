@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The setpoint dial from the app: an arc open at the bottom, running amber at
+  the cold end into orange at the hot end, with the thumb dot at the top of
+  the range.
+
+  Geometry matches DialView: centre (54,54), radius 30, sweeping from 135
+  degrees round through the top to 405 degrees (= 45). All content sits inside
+  the 72x72 adaptive safe zone, so launcher masking cannot clip it.
+
+  The ramp is six overlapping round-capped segments rather than a sweep
+  gradient: VectorDrawable gradients need an inline aapt:attr, and six paths
+  render identically for a fraction of the complexity. Round caps make the
+  joins invisible.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path android:pathData="M32.787,75.213 A30,30 0 0 1 24,54"
+        android:strokeColor="#FFC14D" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+    <path android:pathData="M24,54 A30,30 0 0 1 32.787,32.787"
+        android:strokeColor="#FFAD49" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+    <path android:pathData="M32.787,32.787 A30,30 0 0 1 54,24"
+        android:strokeColor="#FF9945" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+    <path android:pathData="M54,24 A30,30 0 0 1 75.213,32.787"
+        android:strokeColor="#FF8642" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+    <path android:pathData="M75.213,32.787 A30,30 0 0 1 84,54"
+        android:strokeColor="#FF723E" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+    <path android:pathData="M84,54 A30,30 0 0 1 75.213,75.213"
+        android:strokeColor="#FF5E3A" android:strokeWidth="11"
+        android:strokeLineCap="round" />
+
+    <!-- thumb, centred on the hot end of the arc -->
+    <path android:pathData="M75.213,70.713 a4.5,4.5 0 1 0 0,9 a4.5,4.5 0 1 0 0,-9z"
+        android:fillColor="#FFFFFF" />
+</vector>

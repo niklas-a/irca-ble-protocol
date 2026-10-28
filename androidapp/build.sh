@@ -27,12 +27,18 @@ done
 
 rm -rf "$OUT"; mkdir -p "$OUT/classes" "$OUT/dex"
 
-echo "== 1/6 aapt2 link (manifest only, no resources) =="
+echo "== 1/6 aapt2 compile + link =="
+# The only resources are the launcher icon (an adaptive vector plus bitmap
+# fallbacks). There is no layout XML - the UI is built in code - so nothing
+# here needs an R class.
+"$BT/aapt2.exe" compile --dir "$(cygpath -m "$HERE/res")" \
+  -o "$(cygpath -m "$OUT/res.zip")"
 "$BT/aapt2.exe" link \
   --manifest "$HERE/AndroidManifest.xml" \
   -I "$PLATFORM" \
   --min-sdk-version 26 --target-sdk-version 35 \
-  -o "$APK_UNSIGNED"
+  -o "$APK_UNSIGNED" \
+  "$(cygpath -m "$OUT/res.zip")"
 
 echo "== 2/6 javac =="
 # javac/d8 are Windows binaries: argfiles must hold Windows paths, and they

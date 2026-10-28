@@ -35,7 +35,9 @@ shots/
 # ---------------------------------------------------------------------------
 # Ordinary noise
 # ---------------------------------------------------------------------------
-tools/
+# Leading slash matters: this is the downloaded Android SDK at the repo root,
+# not androidapp/tools/, which holds the icon generator and is committed.
+/tools/
 androidapp/build/
 __pycache__/
 *.py[cod]
@@ -51,3 +53,6 @@ build/
 .idea/
 .DS_Store
 Thumbs.db
+
+# generated icon preview (the committed copy is docs/screenshots/app-icon.png)
+androidapp/tools/icon-preview.png
