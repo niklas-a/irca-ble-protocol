@@ -56,3 +56,6 @@ Thumbs.db
 
 # generated icon preview (the committed copy is docs/screenshots/app-icon.png)
 androidapp/tools/icon-preview.png
+
+# test artifacts
+.pytest_cache/

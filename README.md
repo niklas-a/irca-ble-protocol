@@ -27,6 +27,7 @@ anything else that speaks Bluetooth LE, instead of only from the vendor app.
 | Path | What it is |
 |---|---|
 | [`docs/OLLE_BLE_PROTOCOL.md`](docs/OLLE_BLE_PROTOCOL.md) | **The protocol specification.** GATT map, 20-byte frame format, full opcode table, status layout, auth analysis, verification log. |
+| [`custom_components/irca_ble/`](custom_components/irca_ble/) | **A Home Assistant integration.** Bluetooth discovery, config flow, and entities that adapt to the unit's value family. |
 | [`androidapp/`](androidapp/) | **A working Android app** that controls the heater. Plain Java, no Gradle, no AndroidX — builds to a 37 KB APK in about five seconds. |
 | [`docs/BUILDING_AN_INTEGRATION.md`](docs/BUILDING_AN_INTEGRATION.md) | How to turn the spec into a Home Assistant integration or standalone app. Entity modelling, connection management, publishing checklist. |
 | `scripts/olle_protocol.py` | Dependency-free protocol library: frame building, checksums, status/result parsing. |
@@ -48,11 +49,54 @@ python scripts/probe_status.py <ADDR>        # read-only: nothing is written
 python scripts/olle_ctl.py --addr <ADDR> --no-auth status
 ```
 
-Run the test suite without any hardware:
+Run the test suite — **117 tests, no Bluetooth hardware required**:
 
 ```bash
-cd scripts && python test_protocol.py
+pip install -r requirements-dev.txt
+pytest
 ```
+
+The client tests run against a protocol-accurate fake heater
+(`tests/fake_device.py`) that models the firmware's actual behaviour, not just
+an echo: `SET_ON` resumes the stored mode, `RESULT` echoes opcode-then-sequence,
+`STATUS` only arrives when asked for. Entity tests additionally need Home
+Assistant installed and are skipped without it.
+
+### Home Assistant
+
+Copy `custom_components/irca_ble/` into your HA `config/custom_components/`
+directory and restart, or add this repository to HACS as a custom integration.
+Requires HA 2024.8+ and a Bluetooth adapter or an ESPHome Bluetooth proxy in
+range of the heater.
+
+The heater should be discovered automatically. If not, add it from
+**Settings → Devices & Services → Add Integration → IRCA BLE Heater**. The
+device ID field can be left blank — tested firmware does not enforce
+authentication (spec §5.1), which is what makes this usable without anyone
+sniffing their own phone.
+
+**Entities adapt to the unit's value family** (`STATUS` byte 9):
+
+| | Celsius / Fahrenheit unit | POWER unit ("North Europe") |
+|---|---|---|
+| Primary control | `climate` — target temperature + presets | `number` — power level 1–10 |
+| Presets | `number` × 3 (eco, comfort, antifreeze) | `number` × 3, in levels |
+| Also | `switch` power & child lock, `select` mode, `sensor` alarm & window detection, `binary_sensor` problem & holiday | same |
+
+Modelling a power level as a temperature would give you a thermostat card
+claiming "5 °C", so those units deliberately get numbers instead.
+
+Design notes — connection lifetime, why polling beats a persistent link, how
+to batch a write with its read-back — are in
+[`docs/BUILDING_AN_INTEGRATION.md`](docs/BUILDING_AN_INTEGRATION.md).
+
+#### What is not exposed, on purpose
+
+- **`FACTORY_RESET`** (`0x16`). It sits one opcode away from `SET_LOCK` and
+  there is no safe way to put it in a UI.
+- **`CIP` as a power sensor.** It looked like instantaneous power, but it did
+  not move at all across a full on/off cycle while drifting upward over twenty
+  idle minutes (spec §12.3). Whatever it counts, it isn't watts.
 
 ### The Android app
 
@@ -144,6 +188,13 @@ variant):
 - ✅ `REFRESH_STATUS` write accepted with no authentication
 - ⚠️ Setpoint and mode writes (`0x02`, `0x03`) are exercised by the Android app
   but have not been separately verified frame-by-frame.
+- ⚠️ **The Home Assistant integration has never run against a real heater.**
+  Its logic is covered by 93 tests against a protocol-accurate fake device, so
+  frame construction, sequence matching and error handling are verified — but
+  discovery, the config flow and real BLE connections are not. The author's HA
+  box has no Bluetooth adapter yet.
+- ⚠️ The `climate` entity is doubly untested: no hardware, and the only unit
+  this was developed against is POWER-family, so that code path has never run.
 - ⚠️ The Celsius `×10 − 70` codec is derived from two independent places in the
   app but has never been seen on real hardware — the test unit uses abstract
   power levels 1–10 instead.

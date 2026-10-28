@@ -1,0 +1,13 @@
+# Development and test dependencies.
+#
+# The protocol and client tests need only pytest and bleak. Home Assistant is
+# required solely for tests/test_entities.py, which is skipped when it is not
+# installed - so a minimal checkout still runs the majority of the suite.
+
+pytest>=8.0
+pytest-asyncio>=0.23
+bleak>=0.22
+
+# Optional: enables tests/test_entities.py and lets you import-check the
+# integration against the real HA APIs.
+# homeassistant>=2024.8

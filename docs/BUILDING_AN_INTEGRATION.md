@@ -1,5 +1,11 @@
 # Turning this into a Home Assistant integration (or a standalone app)
 
+> **An implementation of this now exists** in
+> [`custom_components/irca_ble/`](../custom_components/irca_ble/). This
+> document is the design rationale behind it — read it to understand *why* the
+> integration is shaped the way it is, or to port the protocol somewhere else.
+> It is no longer a to-do list.
+
 This document is the bridge between `OLLE_BLE_PROTOCOL.md` (what the device
 speaks) and a shippable product. Read the protocol spec first; everything here
 assumes it.

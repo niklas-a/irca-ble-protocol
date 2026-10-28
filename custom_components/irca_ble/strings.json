@@ -1,0 +1,65 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "Add {name}",
+        "description": "Home Assistant will connect to confirm this is an IRCA heater.\n\nMost units ignore the app-level authentication, so you can normally leave the device ID blank. Only fill it in if commands are rejected.",
+        "data": {
+          "device_id": "Device ID (optional)"
+        }
+      },
+      "user": {
+        "title": "Add an IRCA heater",
+        "description": "These heaters advertise only a name, never a service ID, so every nearby Bluetooth device is listed. Home Assistant will connect to confirm your choice really is one.",
+        "data": {
+          "address": "Device",
+          "device_id": "Device ID (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect. Make sure the heater is in range and that no phone app is connected to it — these heaters accept only one connection at a time.",
+      "not_supported": "That device answered, but does not speak the IRCA protocol."
+    },
+    "abort": {
+      "already_configured": "This heater is already set up.",
+      "no_devices_found": "No connectable Bluetooth devices found.",
+      "not_supported": "That device does not look like an IRCA heater."
+    }
+  },
+  "entity": {
+    "select": {
+      "operating_mode": {
+        "state": {
+          "comfort": "Comfort",
+          "eco": "Eco",
+          "antifreeze": "Antifreeze",
+          "boost": "Boost",
+          "schedule": "Schedule",
+          "manual": "Manual"
+        }
+      }
+    },
+    "sensor": {
+      "alarm": {
+        "state": {
+          "ok": "OK",
+          "ntc_fault": "Temperature sensor fault",
+          "load_fault": "Heating element fault",
+          "date_fault": "Clock fault",
+          "eeprom_fault": "Memory fault"
+        }
+      },
+      "window_detection": {
+        "state": {
+          "disabled": "Disabled",
+          "trigger_off_window_closed": "Off until window closed",
+          "trigger_on_window_closed": "On when window closed",
+          "trigger_on_window_opened": "On when window opened",
+          "unknown": "Unknown"
+        }
+      }
+    }
+  }
+}
