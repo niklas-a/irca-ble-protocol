@@ -19,13 +19,11 @@ from homeassistant.components.climate import (
     HVACAction,
     HVACMode,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
-from .coordinator import IrcaCoordinator
+from .coordinator import IrcaConfigEntry, IrcaCoordinator
 from .entity import IrcaEntity
 from .ircable import protocol as P
 from .number import family_range
@@ -42,9 +40,9 @@ MODE_TO_PRESET = {v: k for k, v in PRESET_TO_MODE.items()}
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IrcaConfigEntry, add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IrcaCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     status = coordinator.data
     mode_settings = status.mode_settings if status is not None else None
     if mode_settings in (P.MS_CELSIUS, P.MS_FAHRENHEIT):

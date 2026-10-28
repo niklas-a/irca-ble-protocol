@@ -12,6 +12,7 @@ from datetime import timedelta
 from typing import Any, Callable, Optional
 
 from homeassistant.components import bluetooth
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -23,6 +24,11 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+# Typed config entry: the coordinator lives on entry.runtime_data rather than
+# in hass.data[DOMAIN], which is what Home Assistant's quality scale expects
+# and what gives platforms a typed handle without a dict lookup.
+IrcaConfigEntry = ConfigEntry["IrcaCoordinator"]
+
 
 class IrcaCoordinator(DataUpdateCoordinator[P.Status]):
     """Polls the heater and funnels every command through one connection each."""
@@ -30,7 +36,7 @@ class IrcaCoordinator(DataUpdateCoordinator[P.Status]):
     def __init__(
         self,
         hass: HomeAssistant,
-        entry: Any,
+        entry: "IrcaConfigEntry",
         address: str,
         device_id: Optional[str] = None,
     ) -> None:

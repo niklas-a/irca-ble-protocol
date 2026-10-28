@@ -15,14 +15,12 @@ from homeassistant.components.number import (
     NumberEntity,
     NumberMode,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
-from .coordinator import IrcaCoordinator
+from .coordinator import IrcaConfigEntry, IrcaCoordinator
 from .entity import IrcaEntity
 from .ircable import protocol as P
 from .ircable.const import (
@@ -75,9 +73,9 @@ PRESETS: tuple[SetpointDesc, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IrcaConfigEntry, add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IrcaCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     status = coordinator.data
     mode_settings = (
         status.mode_settings

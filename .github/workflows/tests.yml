@@ -1,0 +1,69 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  protocol:
+    # The protocol and client layers have no Home Assistant dependency at all,
+    # so they are checked on their own across supported Pythons. This is the
+    # job that must never go red.
+    name: protocol + client (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements-dev.txt
+      - name: Run tests
+        run: pytest -q
+        # tests/test_entities.py skips itself when Home Assistant is absent.
+
+  integration:
+    # Imports every module against a real Home Assistant, which is what
+    # catches renamed or removed APIs after an HA release.
+    name: entities + import check against Home Assistant
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements-dev.txt homeassistant
+      - name: Import every integration module
+        run: |
+          python - <<'PY'
+          import importlib, sys
+          sys.path.insert(0, ".")
+          mods = [
+              "custom_components.irca_ble",
+              "custom_components.irca_ble.coordinator",
+              "custom_components.irca_ble.config_flow",
+              "custom_components.irca_ble.entity",
+              "custom_components.irca_ble.switch",
+              "custom_components.irca_ble.select",
+              "custom_components.irca_ble.number",
+              "custom_components.irca_ble.climate",
+              "custom_components.irca_ble.sensor",
+              "custom_components.irca_ble.binary_sensor",
+          ]
+          bad = []
+          for m in mods:
+              try:
+                  importlib.import_module(m)
+                  print("OK  ", m)
+              except Exception as e:
+                  bad.append(m)
+                  print("FAIL", m, type(e).__name__, e)
+          sys.exit(1 if bad else 0)
+          PY
+      - name: Run full suite
+        run: pytest -q

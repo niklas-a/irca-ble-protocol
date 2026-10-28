@@ -9,13 +9,11 @@ class would put fiction in users' energy dashboards.
 from __future__ import annotations
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
-from .coordinator import IrcaCoordinator
+from .coordinator import IrcaConfigEntry, IrcaCoordinator
 from .entity import IrcaEntity
 from .ircable import protocol as P
 
@@ -30,9 +28,9 @@ WINDOW_STATES = [
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IrcaConfigEntry, add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IrcaCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     add_entities(
         [
             IrcaAlarmSensor(coordinator),

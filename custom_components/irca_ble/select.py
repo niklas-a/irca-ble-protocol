@@ -2,12 +2,10 @@
 from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
-from .coordinator import IrcaCoordinator
+from .coordinator import IrcaConfigEntry, IrcaCoordinator
 from .entity import IrcaEntity
 from .ircable import protocol as P
 
@@ -25,9 +23,9 @@ _BY_VALUE = {mode: name for name, mode in MODE_OPTIONS.items()}
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IrcaConfigEntry, add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IrcaCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     add_entities([IrcaModeSelect(coordinator)])
 
 
