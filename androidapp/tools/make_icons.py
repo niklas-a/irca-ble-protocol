@@ -45,10 +45,10 @@ def draw_icon(size, round_shape):
     else:
         d.rounded_rectangle((0, 0, s - 1, s - 1), radius=int(s * 0.22), fill=BG)
 
-    # Same geometry as the vector: centre, r = 0.30, stroke = 11/108.
+    # Same geometry as the vector: centre, radius 27/108, stroke 10/108.
     c = s / 2
-    r = s * 0.30
-    w = max(1, int(s * (11 / 108.0)))
+    r = s * (27 / 108.0)
+    w = max(1, int(s * (10 / 108.0)))
     box = (c - r, c - r, c + r, c + r)
 
     # Ramp the colour degree by degree. PIL has no gradient stroke and no
