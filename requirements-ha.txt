@@ -1,0 +1,19 @@
+# Extra packages needed to import this integration against a real Home
+# Assistant outside of HA's own environment.
+#
+# `dependencies: ["bluetooth_adapters"]` in the manifest means importing our
+# modules pulls in HA's bluetooth stack, and that stack's own requirements are
+# not installed by the bare `homeassistant` wheel. HA installs them at runtime
+# from each integration's manifest; we have to list them by hand.
+
+homeassistant>=2024.8
+
+aiohasupervisor
+aiousbwatcher
+bleak-retry-connector
+bluetooth-adapters
+bluetooth-auto-recovery
+bluetooth-data-tools
+dbus-fast
+habluetooth
+serialx

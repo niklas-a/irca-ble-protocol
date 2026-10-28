@@ -1,17 +1,17 @@
 {
   "domain": "irca_ble",
   "name": "IRCA BLE Heater",
-  "version": "0.1.0",
-  "documentation": "https://github.com/niklas-a/irca-ble-protocol",
-  "issue_tracker": "https://github.com/niklas-a/irca-ble-protocol/issues",
-  "codeowners": ["@niklas-a"],
-  "config_flow": true,
-  "dependencies": ["bluetooth_adapters"],
-  "integration_type": "device",
-  "iot_class": "local_polling",
-  "requirements": [],
   "bluetooth": [
     { "local_name": "Olle" },
     { "local_name": "Olle*" }
-  ]
+  ],
+  "codeowners": ["@niklas-a"],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://github.com/niklas-a/irca-ble-protocol",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/niklas-a/irca-ble-protocol/issues",
+  "requirements": [],
+  "version": "0.1.0"
 }
